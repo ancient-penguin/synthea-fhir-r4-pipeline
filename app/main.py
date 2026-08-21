@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from fastapi import FastAPI, Request
@@ -9,6 +10,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from app.converter import FHIRTransformationError, transform_to_fhir_bundle
+
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(
     title="Synthea to HL7 FHIR R4 Pipeline Engine",
@@ -29,6 +32,11 @@ async def fhir_transformation_error_handler(
     request: Request, exc: FHIRTransformationError
 ) -> JSONResponse:
     return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+
+@app.get("/health")
+async def health() -> dict[str, str]:
+    return {"status": "ok"}
 
 
 @app.post("/api/v1/fhir/transform")
